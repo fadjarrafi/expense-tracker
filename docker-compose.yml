@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   backend:
@@ -6,21 +6,22 @@ services:
     ports:
       - "8000:8000"
     environment:
-      # Use host.docker.internal to access WSL PostgreSQL from Docker container
       DATABASE_URL: postgresql://expense_user:your_password@host.docker.internal:5432/expense_tracker
+      SECRET_KEY: your-very-secret-key-change-this-in-production
+      DEBUG: "True"
     volumes:
       - ./backend:/app
-    # Add this to enable access to host machine
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
   frontend:
     build: ./frontend
     ports:
-      - "3000:80"
+      - "5173:5173" # Use Vite's default port
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Prevent overwriting node_modules
     depends_on:
       - backend
-
-# Remove the db service completely since we're using local PostgreSQL
-# volumes:
-#   postgres_data:  # No longer needed
+    environment:
+      - VITE_API_URL=http://localhost:8000
