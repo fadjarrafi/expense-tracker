@@ -1,27 +1,18 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: expense_tracker
-      POSTGRES_USER: expense_user
-      POSTGRES_PASSWORD: your_password
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   backend:
     build: ./backend
     ports:
       - "8000:8000"
-    depends_on:
-      - db
     environment:
-      DATABASE_URL: postgresql://expense_user:your_password@db/expense_tracker
+      # Use host.docker.internal to access WSL PostgreSQL from Docker container
+      DATABASE_URL: postgresql://expense_user:your_password@host.docker.internal:5432/expense_tracker
     volumes:
       - ./backend:/app
+    # Add this to enable access to host machine
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   frontend:
     build: ./frontend
@@ -30,5 +21,6 @@ services:
     depends_on:
       - backend
 
-volumes:
-  postgres_data:
+# Remove the db service completely since we're using local PostgreSQL
+# volumes:
+#   postgres_data:  # No longer needed
